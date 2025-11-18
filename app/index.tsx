@@ -1,4 +1,4 @@
-import { Redirect, router } from 'expo-router';
+import { Redirect } from 'expo-router';
 import { userAuth } from '@/contexts/AuthContext';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
@@ -14,11 +14,12 @@ export default function Index() {
   }
 
   if (user) {
-    router.replace({ pathname: "/(tabs)" }); 
-    return null;
+    // ✅ send authenticated users into tabs
+    return <Redirect href="/(tabs)" />;
   }
 
-  return <Redirect href="/(auth)/login" />; 
+  // ✅ unauthenticated users go straight to login
+  return <Redirect href="/(auth)/login" />;
 }
 
 const styles = StyleSheet.create({
