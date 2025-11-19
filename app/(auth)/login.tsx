@@ -1,15 +1,5 @@
 import { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  ImageBackground,
-} from 'react-native';
+import {View,Text,TextInput,TouchableOpacity,StyleSheet,KeyboardAvoidingView,Platform,ScrollView,ImageBackground,} from 'react-native';
 import { router } from 'expo-router';
 import { Loader2, Mail, User, Lock, Eye, EyeOff } from 'lucide-react-native';
 import { userAuth } from '@/contexts/AuthContext';
@@ -210,12 +200,36 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-  background: { flex: 1, width: '100%', height: '100%' },
-  overlay: { flex: 1, backgroundColor: 'rgba(245,245,245,0.8)' },
-  scrollContent: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 16 },
-  header: { alignItems: 'center', marginBottom: 32, width: '100%' },
-  title: { fontSize: 30, fontWeight: '300', marginBottom: 8, color: 'gray' },
-  subtitle: { fontSize: 12, color: '#666' },
+  background: { 
+    flex: 1, 
+    width: '100%', 
+    height: '100%' 
+  },
+  overlay: { 
+    flex: 1, 
+    backgroundColor: 'rgba(245,245,245,0.8)' 
+  },
+  scrollContent: { 
+    flexGrow: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    padding: 16 
+  },
+  header: { 
+    alignItems: 'center', 
+    marginBottom: 32, 
+    width: '100%' 
+  },
+  title: { 
+    fontSize: 30, 
+    fontWeight: '300', 
+    marginBottom: 8, 
+    color: 'gray' 
+  },
+  subtitle: { 
+    fontSize: 12, 
+    color: '#666' 
+  },
   card: {
     width: '100%',
     maxWidth: 400,
@@ -228,14 +242,41 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
-  tabs: { flexDirection: 'row', marginBottom: 24, backgroundColor: '#f0f0f0', borderRadius: 50, padding: 4 },
-  tab: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 50 },
-  tabActive: { backgroundColor: '#fff' },
-  tabText: { fontSize: 12, color: '#666' },
-  tabTextActive: { color: 'gray', fontWeight: '600' },
-  form: { gap: 16 },
-  inputGroup: { gap: 8 },
-  label: { fontSize: 12, fontWeight: '500', color: 'gray' },
+  tabs: { 
+    flexDirection: 'row', 
+    marginBottom: 24, 
+    backgroundColor: '#f0f0f0', 
+    borderRadius: 50, 
+    padding: 4 
+  },
+  tab: { 
+    flex: 1, 
+    paddingVertical: 12, 
+    alignItems: 'center', 
+    borderRadius: 50 
+  },
+  tabActive: { 
+    backgroundColor: '#fff' 
+  },
+  tabText: { 
+    fontSize: 12, 
+    color: '#666' 
+  },
+  tabTextActive: { 
+    color: 'gray', 
+    fontWeight: '600' 
+  },
+  form: { 
+    gap: 16 
+  },
+  inputGroup: { 
+    gap: 8 
+  },
+  label: { 
+    fontSize: 12, 
+    fontWeight: '500', 
+    color: 'gray' 
+  },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
