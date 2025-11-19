@@ -14,11 +14,9 @@ export default function Index() {
   }
 
   if (user) {
-    // ✅ send authenticated users into tabs
+   
     return <Redirect href="/(tabs)" />;
   }
-
-  // ✅ unauthenticated users go straight to login
   return <Redirect href="/(auth)/login" />;
 }
 
