@@ -1,12 +1,27 @@
-import React from 'react';
-import {View,Text,StyleSheet,ScrollView,TouchableOpacity,ImageBackground,} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ImageBackground,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { userAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import {FileText,BriefcaseBusiness,NotebookPen,FileUser,Heart,} from 'lucide-react-native';
+import {
+  FileText,
+  BriefcaseBusiness,
+  NotebookPen,
+  FileUser,
+  Heart,
+} from 'lucide-react-native';
 import { NoteCategory } from '@/types/note';
 import BgImage from '@/assets/images/red-colored-stationeries-potted-plant-white-background.jpg';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 const categoryConfig: Record<
   NoteCategory,
@@ -24,6 +39,26 @@ const categoryConfig: Record<
 export default function Dashboard() {
   const { user, logout } = userAuth();
   const router = useRouter();
+  const [username, setUsername] = useState(user?.username || '');
+
+  // Fetch updated profile from AsyncStorage whenever Dashboard comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchProfile = async () => {
+        if (!user?.email) return;
+        try {
+          const stored = await AsyncStorage.getItem(`profile:${user.email}`);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            setUsername(parsed.username || user?.username || '');
+          }
+        } catch (error) {
+          console.log('Failed to load profile:', error);
+        }
+      };
+      fetchProfile();
+    }, [user?.email])
+  );
 
   const handleLogout = async () => {
     try {
@@ -44,7 +79,7 @@ export default function Dashboard() {
             <View>
               <Text style={styles.title}>Notes Journal</Text>
               <Text style={styles.subtitle}>
-                Hi {user?.username ?? 'Guest'} Welcome back!
+                Hi {username || 'Guest'} Welcome back!
               </Text>
             </View>
           </View>
@@ -104,14 +139,8 @@ export default function Dashboard() {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-  scrollContent: {
-    flex: 1, 
-  },
+  background: { flex: 1, width: '100%', height: '100%' },
+  scrollContent: { flex: 1 },
   overlay: {
     flex: 1,
     padding: 16,
@@ -126,58 +155,24 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     marginTop: 24,
   },
-  title: {
-    fontSize: 26,
-    fontWeight: '100',
-    color: 'gray',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: 'gray',
-    marginTop: 4,
-  },
-  categoriesContainer: {
-    gap: 16,
-    marginBottom: 32,
-  },
-  categoryCard: {
-    padding: 24,
-  },
-  categoryContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
+  title: { fontSize: 26, fontWeight: '100', color: 'gray' },
+  subtitle: { fontSize: 16, color: 'gray', marginTop: 4 },
+  categoriesContainer: { gap: 16, marginBottom: 32 },
+  categoryCard: { padding: 24 },
+  categoryContent: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   iconContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     padding: 12,
     borderRadius: 50,
   },
-  categoryLabel: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
+  categoryLabel: { fontSize: 20, fontWeight: '600', color: '#ffffff' },
   categorySubtext: {
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.8)',
     marginTop: 2,
   },
-  allNotesButton: {
-    marginBottom: 16,
-  },
-  buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-    borderRadius: 50,
-  },
-  logoutButton: {
-    marginBottom: 32,
-  },
+  allNotesButton: { marginBottom: 16 },
+  buttonContent: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  buttonText: { color: '#ffffff', fontSize: 16, fontWeight: '600', borderRadius: 50 },
+  logoutButton: { marginBottom: 32 },
 });

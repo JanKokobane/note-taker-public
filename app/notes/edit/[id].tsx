@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  TouchableOpacity,
-} from 'react-native';
+import {View,Text,StyleSheet,ScrollView,KeyboardAvoidingView,Platform,ActivityIndicator,TouchableOpacity,} from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { userAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
@@ -48,7 +39,6 @@ export default function EditNote() {
     category: 'other' as NoteCategory,
   });
 
-  // Load existing note from AsyncStorage
   useEffect(() => {
     const fetchNote = async () => {
       try {

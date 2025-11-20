@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 interface User {
   email: string;
   username: string;
+  password?: string; // optional, if you want to keep it in memory
 }
 
 interface AuthContextType {
@@ -12,6 +13,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  setUser: (user: User | null) => void; // 👈 expose setter
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -20,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   register: async () => {},
   logout: async () => {},
+  setUser: () => {},
 });
 
 export const AuthProvider = ({ children }: any) => {
@@ -46,9 +49,7 @@ export const AuthProvider = ({ children }: any) => {
     users.push(newUser);
 
     await AsyncStorage.setItem("users", JSON.stringify(users));
-
-    // ✅ Do not set currentUser here
-    // User must log in manually after registration
+    // user must log in manually after registration
   };
 
   const login = async (email: string, password: string) => {
@@ -61,11 +62,9 @@ export const AuthProvider = ({ children }: any) => {
 
     if (!found) throw new Error("Invalid email or password");
 
-    await AsyncStorage.setItem(
-      "currentUser",
-      JSON.stringify({ email: found.email, username: found.username })
-    );
-    setUser({ email: found.email, username: found.username });
+    const current = { email: found.email, username: found.username };
+    await AsyncStorage.setItem("currentUser", JSON.stringify(current));
+    setUser(current);
   };
 
   const logout = async () => {
@@ -74,7 +73,7 @@ export const AuthProvider = ({ children }: any) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );
