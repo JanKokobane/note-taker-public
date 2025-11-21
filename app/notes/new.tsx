@@ -1,22 +1,12 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  TouchableOpacity,
-  ImageBackground,
-} from 'react-native';
+import {View,Text,StyleSheet,ScrollView,KeyboardAvoidingView,Platform,ActivityIndicator,TouchableOpacity,ImageBackground,} from 'react-native';
 import { useRouter } from 'expo-router';
 import { userAuth } from '@/contexts/AuthContext'; 
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { Card } from '@/components/ui/Card';
-import { NoteCategory } from '@/types/note';
+import { NoteCategory } from '../../types/notes';
 import { toast } from '@/lib/toast';
 import { ArrowLeft, Save } from 'lucide-react-native';
 import { z } from 'zod';
@@ -54,10 +44,9 @@ export default function NoteForm() {
     if (!user) return;
     setLoading(true);
     try {
-      // validate
+
       noteSchema.parse(formData);
 
-      // build new note
       const newNote = {
         id: uuidv4(),
         user_id: user.email,
@@ -67,17 +56,15 @@ export default function NoteForm() {
         created_at: new Date().toISOString(),
         edited_at: null,
       };
-
-      // get existing notes
-      const storedNotes = await AsyncStorage.getItem('notes');
+  
+      const storageKey = `notes:${user.email}`;
+      const storedNotes = await AsyncStorage.getItem(storageKey);
       const allNotes = storedNotes ? JSON.parse(storedNotes) : [];
-
-      // add new note
       allNotes.push(newNote);
-
-      // save back
-      await AsyncStorage.setItem('notes', JSON.stringify(allNotes));
-
+  
+     
+      await AsyncStorage.setItem(storageKey, JSON.stringify(allNotes));
+  
       toast.success('Note created successfully');
       router.back();
     } catch (err: any) {
@@ -90,7 +77,7 @@ export default function NoteForm() {
       setLoading(false);
     }
   };
-
+  
   return (
     <ImageBackground source={BgImage} style={styles.background} resizeMode="cover">
       <KeyboardAvoidingView

@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  ImageBackground,
-} from 'react-native';
+import {View,Text,StyleSheet,ScrollView,TouchableOpacity,ActivityIndicator,ImageBackground,} from 'react-native';
 import { useRouter } from 'expo-router';
 import { userAuth } from "@/contexts/AuthContext"; 
 import { Button } from '@/components/ui/Button';
@@ -15,7 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Plus, Search, Pencil, Trash2 } from 'lucide-react-native';
+import { Plus, Search, SquarePen, CopyX } from 'lucide-react-native';
 import { formatDistanceToNow } from 'date-fns';
 import BgImage from '@/assets/images/red-colored-stationeries-potted-plant-white-background.jpg';
 
@@ -44,11 +36,11 @@ export default function Notes() {
     if (!user) return;
     setLoading(true);
     try {
-      const storedNotes = await AsyncStorage.getItem('notes');
+      const storageKey = `notes:${user.email}`;
+      const storedNotes = await AsyncStorage.getItem(storageKey);
       const allNotes: Note[] = storedNotes ? JSON.parse(storedNotes) : [];
-      const userNotes = allNotes.filter(n => n.user_id === user.email);
       setNotes(
-        userNotes.sort(
+        allNotes.sort(
           (a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         )
@@ -60,19 +52,21 @@ export default function Notes() {
       setLoading(false);
     }
   };
-
+  
   const handleDelete = async (id: string) => {
     try {
-      const storedNotes = await AsyncStorage.getItem('notes');
+      const storageKey = `notes:${user.email}`;
+      const storedNotes = await AsyncStorage.getItem(storageKey);
       const allNotes: Note[] = storedNotes ? JSON.parse(storedNotes) : [];
       const updatedNotes = allNotes.filter(n => n.id !== id);
-      await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
+      await AsyncStorage.setItem(storageKey, JSON.stringify(updatedNotes));
       setNotes(notes.filter(n => n.id !== id));
     } catch (error) {
       console.error(error);
       alert('Failed to delete note');
     }
   };
+  
 
   const filteredNotes = notes.filter(note => {
     const searchLower = searchQuery.toLowerCase();
@@ -156,18 +150,26 @@ export default function Notes() {
 
                     <View style={styles.noteActions}>
                       <TouchableOpacity
-                        onPress={() => router.push(`/notes/edit/${note.id}` as any)}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/notes/edit/[id]',
+                            params: { id: note.id },
+                          })
+                        }
                         style={styles.actionButton}
                       >
-                        <Pencil size={16} color="#6b7280" />
+                        <SquarePen size={20} color="#6b7280" />
+
                       </TouchableOpacity>
+
                       <TouchableOpacity
                         onPress={() => handleDelete(note.id)}
                         style={styles.actionButton}
                       >
-                        <Trash2 size={16} color="#ef4444" />
+                        <CopyX size={20} color="#ef4444" />
                       </TouchableOpacity>
                     </View>
+                    
                   </View>
                 </Card>
               ))}

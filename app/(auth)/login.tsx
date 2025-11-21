@@ -25,7 +25,7 @@ export default function Login() {
   const handleLogin = async () => {
     setErrorMessage(null);
     setSuccessMessage(null);
-
+  
     if (!email || !password) {
       setErrorMessage('All fields are required');
       return;
@@ -34,10 +34,23 @@ export default function Login() {
       setErrorMessage('Please enter a valid email address');
       return;
     }
-
+  
     setLoading(true);
     try {
-      await login(email, password);
+      const profileKey = `profile:${email}`;
+      const storedProfile = await AsyncStorage.getItem(profileKey);
+  
+      if (!storedProfile) {
+        throw new Error('User not found');
+      }
+  
+      const parsed = JSON.parse(storedProfile);
+  
+      if (parsed.password !== password) {
+        throw new Error('Wrong password');
+      }
+  
+      await login(email, password); 
       setSuccessMessage('Login successful!');
       router.replace('/(tabs)');
     } catch (error: any) {
@@ -46,7 +59,7 @@ export default function Login() {
       setLoading(false);
     }
   };
-
+  
   const handleSignUp = async () => {
     setErrorMessage(null);
     setSuccessMessage(null);

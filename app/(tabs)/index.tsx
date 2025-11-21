@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ import {
   FileUser,
   Heart,
 } from 'lucide-react-native';
-import { NoteCategory } from '@/types/note';
+import { NoteCategory } from '../../types/notes';
 import BgImage from '@/assets/images/red-colored-stationeries-potted-plant-white-background.jpg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
@@ -37,20 +37,22 @@ const categoryConfig: Record<
 };
 
 export default function Dashboard() {
-  const { user, logout } = userAuth();
+  const { user } = userAuth();
   const router = useRouter();
   const [username, setUsername] = useState(user?.username || '');
 
-  // Fetch updated profile from AsyncStorage whenever Dashboard comes into focus
   useFocusEffect(
     React.useCallback(() => {
       const fetchProfile = async () => {
         if (!user?.email) return;
         try {
-          const stored = await AsyncStorage.getItem(`profile:${user.email}`);
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            setUsername(parsed.username || user?.username || '');
+          const usersString = await AsyncStorage.getItem("users");
+          const users = usersString ? JSON.parse(usersString) : [];
+          const found = users.find((u: any) => u.email === user.email);
+          if (found) {
+            setUsername(found.username || user?.username || '');
+          } else {
+            setUsername(user?.username || '');
           }
         } catch (error) {
           console.log('Failed to load profile:', error);
@@ -59,15 +61,7 @@ export default function Dashboard() {
       fetchProfile();
     }, [user?.email])
   );
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      router.replace('/(auth)/login');
-    } catch (error) {
-      console.log('Logout error:', error);
-    }
-  };
+  
 
   const mainCategories: NoteCategory[] = ['work', 'study', 'personal'];
 
@@ -93,12 +87,7 @@ export default function Dashboard() {
                   key={category}
                   onPress={() => router.push(`/notes/category/${category}` as any)}
                 >
-                  <Card
-                    style={[
-                      styles.categoryCard,
-                      { backgroundColor: config.gradient },
-                    ]}
-                  >
+                  <Card style={[styles.categoryCard, { backgroundColor: config.gradient }]}>
                     <View style={styles.categoryContent}>
                       <View style={styles.iconContainer}>
                         <Icon size={24} color="#ffffff" />
@@ -123,14 +112,6 @@ export default function Dashboard() {
               <FileText size={20} color="#ffffff" />
               <Text style={styles.buttonText}>View All Notes</Text>
             </View>
-          </Button>
-
-          <Button
-            onPress={handleLogout}
-            variant="outline"
-            style={styles.logoutButton}
-          >
-            Logout
           </Button>
         </View>
       </ScrollView>
@@ -174,5 +155,4 @@ const styles = StyleSheet.create({
   allNotesButton: { marginBottom: 16 },
   buttonContent: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   buttonText: { color: '#ffffff', fontSize: 16, fontWeight: '600', borderRadius: 50 },
-  logoutButton: { marginBottom: 32 },
 });

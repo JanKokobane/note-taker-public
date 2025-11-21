@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 interface User {
   email: string;
   username: string;
-  password?: string; // optional, if you want to keep it in memory
+  password?: string; 
 }
 
 interface AuthContextType {
@@ -13,7 +13,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  setUser: (user: User | null) => void; // 👈 expose setter
+  setUser: (user: User | null) => void; 
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: any) => {
     users.push(newUser);
 
     await AsyncStorage.setItem("users", JSON.stringify(users));
-    // user must log in manually after registration
+  
   };
 
   const login = async (email: string, password: string) => {

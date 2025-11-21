@@ -6,6 +6,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { userAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -16,25 +17,26 @@ import { toast } from '@/lib/toast';
 import { Save } from 'lucide-react-native';
 
 export default function Profile() {
-  const { user, setUser } = userAuth(); // make sure AuthContext exposes setUser
+  const { user, setUser } = userAuth(); 
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
-  const profileKey = user?.email ? `profile:${user.email}` : null;
 
   useEffect(() => {
     fetchProfile();
   }, [user?.email]);
 
   const fetchProfile = async () => {
-    if (!profileKey) return;
+    if (!user?.email) return;
     try {
-      const storedProfile = await AsyncStorage.getItem(profileKey);
-      if (storedProfile) {
-        const parsed = JSON.parse(storedProfile);
-        setUsername(parsed.username || '');
+      const usersString = await AsyncStorage.getItem("users");
+      const users = usersString ? JSON.parse(usersString) : [];
+      const found = users.find((u: any) => u.email === user.email);
+      if (found) {
+        setUsername(found.username || '');
       } else {
         setUsername('');
       }
@@ -44,7 +46,7 @@ export default function Profile() {
   };
 
   const handleUpdateProfile = async () => {
-    if (!profileKey) return;
+    if (!user?.email) return;
     if (!username.trim()) {
       toast.error('Username cannot be empty');
       return;
@@ -52,13 +54,16 @@ export default function Profile() {
 
     setLoading(true);
     try {
-      const stored = await AsyncStorage.getItem(profileKey);
-      const parsed = stored ? JSON.parse(stored) : {};
-      const updated = { ...parsed, email: user?.email, username: username.trim() };
+      const usersString = await AsyncStorage.getItem("users");
+      let users = usersString ? JSON.parse(usersString) : [];
 
-      await AsyncStorage.setItem(profileKey, JSON.stringify(updated));
+      users = users.map((u: any) =>
+        u.email === user.email ? { ...u, username: username.trim() } : u
+      );
 
-      // update context so Dashboard sees new username
+      await AsyncStorage.setItem("users", JSON.stringify(users));
+      await AsyncStorage.setItem("currentUser", JSON.stringify({ email: user.email, username }));
+
       setUser({ ...user, username: username.trim() });
 
       toast.success('Profile updated successfully');
@@ -70,8 +75,8 @@ export default function Profile() {
   };
 
   const handleUpdatePassword = async () => {
-    if (!profileKey) return;
-    if (newPassword.length < 6) {
+    if (!user?.email) return;
+    if (!newPassword || newPassword.length < 6) {
       toast.error('Password must be at least 6 characters');
       return;
     }
@@ -82,18 +87,49 @@ export default function Profile() {
 
     setLoading(true);
     try {
-      const stored = await AsyncStorage.getItem(profileKey);
-      const parsed = stored ? JSON.parse(stored) : {};
-      const updated = { ...parsed, email: user?.email, password: newPassword };
+      const usersString = await AsyncStorage.getItem("users");
+      let users = usersString ? JSON.parse(usersString) : [];
 
-      await AsyncStorage.setItem(profileKey, JSON.stringify(updated));
+      const found = users.find((u: any) => u.email === user.email);
+      if (!found) {
+        toast.error('User not found');
+        setLoading(false);
+        return;
+      }
 
-      // optionally update context if you want password in memory
-      setUser({ ...user, password: newPassword });
+      if (found.password) {
+        if (!currentPassword.trim()) {
+          toast.error('Please enter your current password');
+          setLoading(false);
+          return;
+        }
+        if (found.password !== currentPassword) {
+          toast.error('Current password is incorrect');
+          setLoading(false);
+          return;
+        }
+        if (found.password === newPassword) {
+          toast.error('New password cannot be the same as the old password');
+          setLoading(false);
+          return;
+        }
+      }
 
-      toast.success('Password updated successfully');
+      users = users.map((u: any) =>
+        u.email === user.email ? { ...u, password: newPassword } : u
+      );
+
+      await AsyncStorage.setItem("users", JSON.stringify(users));
+      await AsyncStorage.setItem("currentUser", JSON.stringify({ email: user.email, username: found.username }));
+
+      // Force logout
+      setUser(null);
+      toast.success('Password updated successfully. Please log in again.');
+      setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+
+      router.replace('/login');
     } catch {
       toast.error('Failed to update password');
     } finally {
@@ -139,6 +175,15 @@ export default function Profile() {
         <Card style={styles.card}>
           <Text style={styles.cardTitle}>Change Password</Text>
           <View style={styles.form}>
+            <View style={styles.field}>
+              <Label>Current Password</Label>
+              <Input
+                placeholder="Enter current password"
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                secureTextEntry
+              />
+            </View>
             <View style={styles.field}>
               <Label>New Password</Label>
               <Input

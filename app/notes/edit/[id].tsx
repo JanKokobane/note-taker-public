@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { Card } from '@/components/ui/Card';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NoteCategory } from '@/types/note';
+import { NoteCategory } from '../../../types/notes';
 import { toast } from '@/lib/toast';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react-native';
 import { z } from 'zod';
@@ -42,7 +42,8 @@ export default function EditNote() {
   useEffect(() => {
     const fetchNote = async () => {
       try {
-        const storedNotes = await AsyncStorage.getItem('notes');
+        const storageKey = `notes:${user?.email}`;
+        const storedNotes = await AsyncStorage.getItem(storageKey);
         const allNotes = storedNotes ? JSON.parse(storedNotes) : [];
         const note = allNotes.find((n: any) => n.id === id && n.user_id === user?.email);
         if (note) {
@@ -62,16 +63,17 @@ export default function EditNote() {
     };
     if (id && user) fetchNote();
   }, [id, user]);
-
+  
   const handleSubmit = async () => {
     if (!user) return;
     setLoading(true);
     try {
       noteSchema.parse(formData);
-
-      const storedNotes = await AsyncStorage.getItem('notes');
+  
+      const storageKey = `notes:${user.email}`;
+      const storedNotes = await AsyncStorage.getItem(storageKey);
       const allNotes = storedNotes ? JSON.parse(storedNotes) : [];
-
+  
       const updatedNotes = allNotes.map((n: any) =>
         n.id === id
           ? {
@@ -83,9 +85,9 @@ export default function EditNote() {
             }
           : n
       );
-
-      await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
-
+  
+      await AsyncStorage.setItem(storageKey, JSON.stringify(updatedNotes));
+  
       toast.success('Note updated successfully');
       router.back();
     } catch (err: any) {
@@ -98,20 +100,21 @@ export default function EditNote() {
       setLoading(false);
     }
   };
-
+  
   const handleDelete = async () => {
     try {
-      const storedNotes = await AsyncStorage.getItem('notes');
+      const storageKey = `notes:${user.email}`;
+      const storedNotes = await AsyncStorage.getItem(storageKey);
       const allNotes = storedNotes ? JSON.parse(storedNotes) : [];
       const updatedNotes = allNotes.filter((n: any) => n.id !== id);
-      await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
+      await AsyncStorage.setItem(storageKey, JSON.stringify(updatedNotes));
       toast.success('Note deleted successfully');
       router.back();
     } catch (error) {
       toast.error('Failed to delete note');
     }
   };
-
+  
   return (
     <KeyboardAvoidingView
       style={styles.container}
