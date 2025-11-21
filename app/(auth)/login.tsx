@@ -25,7 +25,7 @@ export default function Login() {
   const handleLogin = async () => {
     setErrorMessage(null);
     setSuccessMessage(null);
-  
+
     if (!email || !password) {
       setErrorMessage('All fields are required');
       return;
@@ -34,23 +34,23 @@ export default function Login() {
       setErrorMessage('Please enter a valid email address');
       return;
     }
-  
+
     setLoading(true);
     try {
       const profileKey = `profile:${email}`;
       const storedProfile = await AsyncStorage.getItem(profileKey);
-  
+
       if (!storedProfile) {
         throw new Error('User not found');
       }
-  
+
       const parsed = JSON.parse(storedProfile);
-  
+
       if (parsed.password !== password) {
         throw new Error('Wrong password');
       }
-  
-      await login(email, password); 
+
+      await login(email, password);
       setSuccessMessage('Login successful!');
       router.replace('/(tabs)');
     } catch (error: any) {
@@ -59,7 +59,7 @@ export default function Login() {
       setLoading(false);
     }
   };
-  
+
   const handleSignUp = async () => {
     setErrorMessage(null);
     setSuccessMessage(null);
@@ -78,21 +78,19 @@ export default function Login() {
     }
 
     setLoading(true);
-    const register = async (email: string, username: string, password: string) => {
-      const usersString = await AsyncStorage.getItem("users");
-      let users = usersString ? JSON.parse(usersString) : [];
-    
-      const exists = users.find((u: any) => u.email === email);
-      if (exists) throw new Error("Email already registered");
-    
-      const newUser = { email, username, password };
-      users.push(newUser);
-    
-      await AsyncStorage.setItem("users", JSON.stringify(users));
+    try {
+   
+      await register(email, username, password);
 
-      return true;
-    };
-    
+      await login(email, password);
+
+      setSuccessMessage('Sign up successful!');
+      router.replace('/(tabs)');
+    } catch (error: any) {
+      setErrorMessage(error.message || 'Failed to sign up');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

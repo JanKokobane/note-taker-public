@@ -246,8 +246,8 @@ const styles = StyleSheet.create({
   },
   backButton: { padding: 8, marginRight: 8 },
   headerContent: { flex: 1 },
-  title: { fontSize: 20, fontWeight: 'bold', color: '#111827' },
-  subtitle: { fontSize: 12, color: '#6b7280', marginTop: 2 },
+  title: { fontSize: 24, fontWeight: 100, color: 'gray' },
+  subtitle: { fontSize: 12, color: 'gray', marginTop: 2 },
   addButton: { marginLeft: 8 },
 
   searchContainer: {
@@ -263,6 +263,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     paddingLeft: 36,
+    borderRadius: 50,
   },
 
   sortContainer: {
@@ -275,14 +276,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 8,
+    borderRadius: 50,
     borderWidth: 1,
     borderColor: '#e5e7eb',
     backgroundColor: '#ffffff',
   },
   sortButtonActive: {
-    backgroundColor: '#2563eb',
-    borderColor: '#2563eb',
+    backgroundColor: '#E3256B',
   },
   sortText: {
     fontSize: 13,
