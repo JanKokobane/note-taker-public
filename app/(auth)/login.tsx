@@ -63,7 +63,7 @@ export default function Login() {
   const handleSignUp = async () => {
     setErrorMessage(null);
     setSuccessMessage(null);
-
+  
     if (!email || !password || !username) {
       setErrorMessage('All fields are required');
       return;
@@ -76,14 +76,18 @@ export default function Login() {
       setErrorMessage('Password must be at least 8 characters long');
       return;
     }
-
+  
     setLoading(true);
     try {
-   
+
       await register(email, username, password);
 
+      const profileKey = `profile:${email}`;
+      const newProfile = { email, username, password };
+      await AsyncStorage.setItem(profileKey, JSON.stringify(newProfile));
+  
       await login(email, password);
-
+  
       setSuccessMessage('Sign up successful!');
       router.replace('/(tabs)');
     } catch (error: any) {
@@ -92,7 +96,7 @@ export default function Login() {
       setLoading(false);
     }
   };
-
+  
   return (
     <ImageBackground source={BgImage} style={styles.background} resizeMode="cover">
       <KeyboardAvoidingView
