@@ -8,10 +8,19 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Note } from '../../../types/notes';
 import { toast } from '@/lib/toast';
-import { Plus, Search, SquarePen,  CopyX, ArrowLeft } from 'lucide-react-native';
+import { Plus, Search, SquarePen, CopyX, ArrowLeft } from 'lucide-react-native';
 import { formatDistanceToNow } from 'date-fns';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BgImage from '@/assets/images/red-colored-stationeries-potted-plant-white-background.jpg';
+
+const safeParse = <T = any>(raw: string | null, fallback: T): T => {
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+};
 
 export default function CategoryNotes() {
   const { user } = userAuth();
@@ -34,7 +43,7 @@ export default function CategoryNotes() {
     setLoading(true);
     try {
       const storedNotes = await AsyncStorage.getItem(storageKey);
-      const allNotes: Note[] = storedNotes ? JSON.parse(storedNotes) : [];
+      const allNotes: Note[] = safeParse<Note[]>(storedNotes, []);
 
       let filtered = [...allNotes];
       if (category && category !== 'all') {
@@ -50,6 +59,7 @@ export default function CategoryNotes() {
       setNotes(filtered);
     } catch (error) {
       toast.error('Failed to fetch notes');
+      setNotes([]);
     } finally {
       setLoading(false);
     }
@@ -58,7 +68,7 @@ export default function CategoryNotes() {
   const handleDelete = async (id: string) => {
     try {
       const storedNotes = await AsyncStorage.getItem(storageKey);
-      const allNotes: Note[] = storedNotes ? JSON.parse(storedNotes) : [];
+      const allNotes: Note[] = safeParse<Note[]>(storedNotes, []);
       const updatedNotes = allNotes.filter((n) => n.id !== id);
 
       await AsyncStorage.setItem(storageKey, JSON.stringify(updatedNotes));
@@ -106,26 +116,25 @@ export default function CategoryNotes() {
         </View>
 
         <View style={styles.noteActions}>
-            <TouchableOpacity
-              onPress={() =>
-                router.push({
-                  pathname: '/notes/edit/[id]' as const,   
-                  params: { id: note.id },
-                })
-              }
-              style={styles.actionButton}
-            >
-              <SquarePen size={20} color="#6b7280" />
-            </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: '/notes/edit/[id]' as const,
+                params: { id: note.id },
+              })
+            }
+            style={styles.actionButton}
+          >
+            <SquarePen size={20} color="#6b7280" />
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => handleDelete(note.id)}
-              style={styles.actionButton}
-            >
-              < CopyX size={20} color="#ef4444" />
-            </TouchableOpacity>
-          </View>
-
+          <TouchableOpacity
+            onPress={() => handleDelete(note.id)}
+            style={styles.actionButton}
+          >
+            <CopyX size={20} color="#ef4444" />
+          </TouchableOpacity>
+        </View>
       </View>
     </Card>
   );
@@ -222,7 +231,6 @@ export default function CategoryNotes() {
     </ImageBackground>
   );
 }
-
 
 const styles = StyleSheet.create({
   background: { 

@@ -30,6 +30,16 @@ const categories: { label: string; value: NoteCategory }[] = [
   { label: 'Other', value: 'other' },
 ];
 
+// helper to safely parse JSON
+const safeParse = <T = any>(raw: string | null, fallback: T): T => {
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+};
+
 export default function NoteForm() {
   const { user } = userAuth();
   const router = useRouter();
@@ -41,10 +51,9 @@ export default function NoteForm() {
   });
 
   const handleSubmit = async () => {
-    if (!user) return;
+    if (!user?.email) return;
     setLoading(true);
     try {
-
       noteSchema.parse(formData);
 
       const newNote = {
@@ -59,11 +68,10 @@ export default function NoteForm() {
   
       const storageKey = `notes:${user.email}`;
       const storedNotes = await AsyncStorage.getItem(storageKey);
-      const allNotes = storedNotes ? JSON.parse(storedNotes) : [];
-      allNotes.push(newNote);
+      const allNotes = safeParse<any[]>(storedNotes, []);
+      const updatedNotes = [...allNotes, newNote];
   
-     
-      await AsyncStorage.setItem(storageKey, JSON.stringify(allNotes));
+      await AsyncStorage.setItem(storageKey, JSON.stringify(updatedNotes));
   
       toast.success('Note created successfully');
       router.back();
@@ -162,6 +170,7 @@ export default function NoteForm() {
     </ImageBackground>
   );
 }
+
 
 const styles = StyleSheet.create({
   background: { 

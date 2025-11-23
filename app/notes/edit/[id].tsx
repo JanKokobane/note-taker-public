@@ -28,6 +28,16 @@ const categories: { label: string; value: NoteCategory }[] = [
   { label: 'Other', value: 'other' },
 ];
 
+// helper to safely parse JSON
+const safeParse = <T = any>(raw: string | null, fallback: T): T => {
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+};
+
 export default function EditNote() {
   const { user } = userAuth();
   const router = useRouter();
@@ -42,10 +52,11 @@ export default function EditNote() {
   useEffect(() => {
     const fetchNote = async () => {
       try {
-        const storageKey = `notes:${user?.email}`;
+        if (!user?.email) return;
+        const storageKey = `notes:${user.email}`;
         const storedNotes = await AsyncStorage.getItem(storageKey);
-        const allNotes = storedNotes ? JSON.parse(storedNotes) : [];
-        const note = allNotes.find((n: any) => n.id === id && n.user_id === user?.email);
+        const allNotes = safeParse<any[]>(storedNotes, []);
+        const note = allNotes.find((n: any) => n.id === id && n.user_id === user.email);
         if (note) {
           setFormData({
             title: note.title || '',
@@ -65,14 +76,14 @@ export default function EditNote() {
   }, [id, user]);
   
   const handleSubmit = async () => {
-    if (!user) return;
+    if (!user?.email) return;
     setLoading(true);
     try {
       noteSchema.parse(formData);
   
       const storageKey = `notes:${user.email}`;
       const storedNotes = await AsyncStorage.getItem(storageKey);
-      const allNotes = storedNotes ? JSON.parse(storedNotes) : [];
+      const allNotes = safeParse<any[]>(storedNotes, []);
   
       const updatedNotes = allNotes.map((n: any) =>
         n.id === id
@@ -103,9 +114,10 @@ export default function EditNote() {
   
   const handleDelete = async () => {
     try {
+      if (!user?.email) return;
       const storageKey = `notes:${user.email}`;
       const storedNotes = await AsyncStorage.getItem(storageKey);
-      const allNotes = storedNotes ? JSON.parse(storedNotes) : [];
+      const allNotes = safeParse<any[]>(storedNotes, []);
       const updatedNotes = allNotes.filter((n: any) => n.id !== id);
       await AsyncStorage.setItem(storageKey, JSON.stringify(updatedNotes));
       toast.success('Note deleted successfully');

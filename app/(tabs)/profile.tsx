@@ -16,6 +16,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { toast } from '@/lib/toast';
 import { Save } from 'lucide-react-native';
 
+// helper to safely parse JSON
+const safeParse = <T = any>(raw: string | null, fallback: T): T => {
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+};
+
 export default function Profile() {
   const { user, setUser } = userAuth(); 
   const router = useRouter();
@@ -33,7 +43,7 @@ export default function Profile() {
     if (!user?.email) return;
     try {
       const usersString = await AsyncStorage.getItem("users");
-      const users = usersString ? JSON.parse(usersString) : [];
+      const users = safeParse<any[]>(usersString, []);
       const found = users.find((u: any) => u.email === user.email);
       if (found) {
         setUsername(found.username || '');
@@ -55,7 +65,7 @@ export default function Profile() {
     setLoading(true);
     try {
       const usersString = await AsyncStorage.getItem("users");
-      let users = usersString ? JSON.parse(usersString) : [];
+      let users = safeParse<any[]>(usersString, []);
 
       users = users.map((u: any) =>
         u.email === user.email ? { ...u, username: username.trim() } : u
@@ -88,7 +98,7 @@ export default function Profile() {
     setLoading(true);
     try {
       const usersString = await AsyncStorage.getItem("users");
-      let users = usersString ? JSON.parse(usersString) : [];
+      let users = safeParse<any[]>(usersString, []);
 
       const found = users.find((u: any) => u.email === user.email);
       if (!found) {
@@ -122,7 +132,6 @@ export default function Profile() {
       await AsyncStorage.setItem("users", JSON.stringify(users));
       await AsyncStorage.setItem("currentUser", JSON.stringify({ email: user.email, username: found.username }));
 
-      // Force logout
       setUser(null);
       toast.success('Password updated successfully. Please log in again.');
       setCurrentPassword('');

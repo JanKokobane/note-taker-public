@@ -1,50 +1,67 @@
-# Welcome to your Expo app 👋
+# 📒 Notes Journal – React Native Notes Application
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Overview
+Notes Journal is a secure note‑taking application built with React Native. It allows users to create, manage, and organize notes into categories such as **Work**, **Study**, and **Personal**. The app implements full CRUD functionality and uses **AsyncStorage** as a lightweight local database.
 
-## Get started
+This project was developed as part of the React Native curriculum (Lesson 3), focusing on navigation, routing, and authentication.
 
-1. Install dependencies
 
-   ```bash
-   npm install
-   ```
+## 📸 Screenshots
 
-2. Start the app
+### 1. Login Screen
+![Login Screen](docs/login.png)
 
-   ```bash
-   npx expo start
-   ```
+### 2. Sign Up Screen
+![Sign Up Screen](docs/signup.png)
 
-In the output, you'll find options to open the app in a
+### 3. Notes List
+![Notes List](docs/notes-list.png)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### 4. Edit Note
+![Edit Note](docs/edit-note.png)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Get a fresh project
+## ✨ Features
+- 🔐 **User Management**
+  - Register with email, username, and password
+  - Login securely
+  - Protected routing (authenticated users only)
+  - Update profile credentials
 
-When you're ready, run:
+- 🗂️ **Notes Management**
+  - Add notes with text, category, date, and optional title
+  - View all notes
+  - Edit notes with updated timestamps
+  - Delete notes
+  - Search notes by text
+  - Sort notes by date (ascending/descending)
 
+- ⚙️ **Tech Stack**
+  - React Native
+  - Expo Router for navigation
+  - AsyncStorage for persistence
+  - Lucide React Native icons
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (>= 18)
+- Expo CLI
+- EAS CLI (for builds)
+- Android Studio / Xcode (for emulator testing)
+
+### Installation
 ```bash
-npm run reset-project
-```
+# Clone the repository
+https://github.com/JanKokobane/react-native-note-taker.git
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+# Navigate into the project
+cd react-native-note-taker
 
-## Learn more
+# Install dependencies
+npm install
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+# Start App
+npm start

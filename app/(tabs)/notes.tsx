@@ -21,6 +21,16 @@ interface Note {
   edited_at?: string;
 }
 
+// helper to safely parse JSON
+const safeParse = <T = any>(raw: string | null, fallback: T): T => {
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+};
+
 export default function Notes() {
   const { user } = userAuth(); 
   const router = useRouter();
@@ -33,40 +43,44 @@ export default function Notes() {
   }, [user]);
 
   const fetchNotes = async () => {
-    if (!user) return;
+    if (!user?.email) {
+      setNotes([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const storageKey = `notes:${user.email}`;
       const storedNotes = await AsyncStorage.getItem(storageKey);
-      const allNotes: Note[] = storedNotes ? JSON.parse(storedNotes) : [];
-      setNotes(
-        allNotes.sort(
-          (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        )
+      const allNotes: Note[] = safeParse<Note[]>(storedNotes, []);
+      const sorted = allNotes.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
+      setNotes(sorted);
     } catch (error) {
-      console.error(error);
+      console.error('Failed to fetch notes', error);
       alert('Failed to fetch notes');
+      setNotes([]);
     } finally {
       setLoading(false);
     }
   };
   
   const handleDelete = async (id: string) => {
+    if (!user?.email) return;
     try {
       const storageKey = `notes:${user.email}`;
       const storedNotes = await AsyncStorage.getItem(storageKey);
-      const allNotes: Note[] = storedNotes ? JSON.parse(storedNotes) : [];
+      const allNotes: Note[] = safeParse<Note[]>(storedNotes, []);
       const updatedNotes = allNotes.filter(n => n.id !== id);
       await AsyncStorage.setItem(storageKey, JSON.stringify(updatedNotes));
-      setNotes(notes.filter(n => n.id !== id));
+      setNotes(prev => prev.filter(n => n.id !== id));
     } catch (error) {
-      console.error(error);
+      console.error('Failed to delete note', error);
       alert('Failed to delete note');
     }
   };
-  
 
   const filteredNotes = notes.filter(note => {
     const searchLower = searchQuery.toLowerCase();
@@ -159,7 +173,6 @@ export default function Notes() {
                         style={styles.actionButton}
                       >
                         <SquarePen size={20} color="#6b7280" />
-
                       </TouchableOpacity>
 
                       <TouchableOpacity
