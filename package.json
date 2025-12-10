@@ -1,6 +1,7 @@
 {
   "name": "react-native-note-taker",
-  "main": "expo-router/entry",
+  "main": "node_modules/expo/AppEntry.js",
+
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
