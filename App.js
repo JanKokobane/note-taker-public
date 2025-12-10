@@ -1,5 +1,9 @@
-import { Slot } from "expo-router";
+import { View, Text } from "react-native";
 
 export default function App() {
-  return <Slot />;
+  return (
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <Text>Note Taker</Text>
+    </View>
+  );
 }
